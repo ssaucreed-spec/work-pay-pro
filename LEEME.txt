@@ -1,0 +1,13 @@
+WORK & PAY PRO — versión web instalable (PWA)
+
+CONTENIDO
+- index.html: aplicación completa.
+- manifest.webmanifest: configuración para instalarla como aplicación.
+- sw.js: caché básica para abrirla sin conexión después de la primera carga.
+- icon.svg: icono.
+
+IMPORTANTE
+1. Para que Chrome permita instalarla como aplicación PWA y para que funcione el modo sin conexión, debe servirse desde una dirección HTTPS (o localhost). Abrir index.html directamente como archivo no activa todas las funciones PWA.
+2. Los datos se guardan localmente en el navegador de ese dispositivo. No se sincronizan con otros dispositivos. Exportá copias JSON desde Historial > Exportar copia.
+3. Al importar una copia, los datos actuales se reemplazan; exportá primero una copia de seguridad si querés conservarlos.
+4. Esta carpeta aún no es un APK Android. Es el paquete web listo para alojarse por HTTPS y luego instalarse desde Chrome. Para un APK nativo hará falta empaquetarlo y compilarlo con herramientas de Android.
