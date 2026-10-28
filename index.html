@@ -1,120 +1,130 @@
-jsx
 import React, { useState } from 'react';
-​export default function App() {
-const [activeTab, setActiveTab] = useState('jornada');
-​return (
-<div style={styles.appContainer}>
-<header style={styles.header}>
-<div style={styles.headerTitleGroup}>
-<span style={styles.logoIcon}>W</span>
-<div>
-<h1 style={styles.headerTitle}>Work & Pay Pro</h1>
-<p style={styles.headerSubtitle}>mié, 28 oct 2026</p>
-</div>
-</div>
-<button style={styles.backupBtn}>↓ Respaldo</button>
-</header>
-​<main style={styles.mainContent}>
-<div style={styles.cardsRow}>
-<div style={styles.card}>
-<span style={styles.cardLabel}>A COBRAR</span>
-<span style={styles.cardValue}>0,00 €</span>
-<span style={styles.cardSubtext}>0,0 h acumuladas</span>
-</div>
-<div style={styles.card}>
-<span style={styles.cardLabel}>DISPONIBLE</span>
-<span style={styles.cardValue}>0,00 €</span>
-<span style={styles.cardSubtext}>Cobrado menos gastos</span>
-</div>
-</div>
-​<div style={styles.sectionCard}>
-<h2 style={styles.sectionTitle}>Tarifas por hora</h2>
-<div style={styles.ratesRow}>
-<div style={styles.inputGroup}>
-<label style={styles.label}>Hora normal (€)</label>
-<input type="number" defaultValue="15" style={styles.input} />
-</div>
-<div style={styles.inputGroup}>
-<label style={styles.label}>Hora extra (€)</label>
-<input type="number" defaultValue="18" style={styles.input} />
-</div>
-</div>
-</div>
-​<div style={styles.sectionCard}>
-<h2 style={styles.sectionTitle}>+ Registrar jornada</h2>
-<div style={styles.formRow}>
-<div style={styles.inputGroup}>
-<label style={styles.label}>Fecha</label>
-<input type="date" defaultValue="2026-10-28" style={styles.input} />
-</div>
-<div style={styles.inputGroup}>
-<label style={styles.label}>Tipo de día</label>
-<select style={styles.select}>
-<option>Día normal</option>
-<option>Festivo</option>
-</select>
-</div>
-</div>
-​<div style={styles.formRow3}>
-<div style={styles.inputGroup}>
-<label style={styles.label}>Entrada</label>
-<input type="time" defaultValue="09:00" style={styles.input} />
-</div>
-<div style={styles.inputGroup}>
-<label style={styles.label}>Salida</label>
-<input type="time" defaultValue="18:00" style={styles.input} />
-</div>
-<div style={styles.inputGroup}>
-<label style={styles.label}>Descanso (min)</label>
-<input type="number" defaultValue="60" style={styles.input} />
-</div>
-</div>
-​<div style={styles.inputGroup}>
-<label style={styles.label}>Categoría</label>
-<select style={styles.select}>
-<option>General</option>
-</select>
-</div>
-​<div style={{ ...styles.inputGroup, marginTop: '10px' }}>
-<label style={styles.label}>Notas del día</label>
-<textarea placeholder="Detalles de la jornada..." style={styles.textarea}></textarea>
-</div>
-​<button style={styles.saveBtn}>Guardar jornada</button>
-</div>
-</main>
-​<nav style={styles.bottomNav}>
-<button
-style={{ ...styles.navItem, color: activeTab === 'jornada' ? '#3b82f6' : '#9ca3af' }}
-onClick={() => setActiveTab('jornada')}
->
-<span style={styles.navIcon}>⏱</span>
-<span>Jornada</span>
-</button>
-<button
-style={{ ...styles.navItem, color: activeTab === 'cobro' ? '#3b82f6' : '#9ca3af' }}
-onClick={() => setActiveTab('cobro')}
->
-<span style={styles.navIcon}>€</span>
-<span>Cobro</span>
-</button>
-<button
-style={{ ...styles.navItem, color: activeTab === 'gastos' ? '#3b82f6' : '#9ca3af' }}
-onClick={() => setActiveTab('gastos')}
->
-<span style={styles.navIcon}>📊</span>
-<span>Gastos</span>
-</button>
-<button
-style={{ ...styles.navItem, color: activeTab === 'historial' ? '#3b82f6' : '#9ca3af' }}
-onClick={() => setActiveTab('historial')}
->
-<span style={styles.navIcon}>📅</span>
-<span>Historial</span>
-</button>
-</nav>
-</div>
-);
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('jornada');
+
+  return (
+    <div style={styles.appContainer}>
+      <header style={styles.header}>
+        <div style={styles.headerTitleGroup}>
+          <span style={styles.logoIcon}>W</span>
+          <div>
+            <h1 style={styles.headerTitle}>Work & Pay Pro</h1>
+            <p style={styles.headerSubtitle}>mié, 28 oct 2026</p>
+          </div>
+        </div>
+        <button style={styles.backupBtn}>Respaldo</button>
+      </header>
+
+      <main style={styles.mainContent}>
+        <div style={styles.cardsRow}>
+          <div style={styles.card}>
+            <span style={styles.cardLabel}>A COBRAR</span>
+            <span style={styles.cardValue}>0,00 €</span>
+            <span style={styles.cardSubtext}>0,0 h acumuladas</span>
+          </div>
+          <div style={styles.card}>
+            <span style={styles.cardLabel}>DISPONIBLE</span>
+            <span style={styles.cardValue}>0,00 €</span>
+            <span style={styles.cardSubtext}>Cobrado menos gastos</span>
+          </div>
+        </div>
+
+        <div style={styles.sectionCard}>
+          <h2 style={styles.sectionTitle}>Tarifas por hora</h2>
+          <div style={styles.ratesRow}>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Hora normal (€)</label>
+              <input type="number" defaultValue="15" style={styles.input} />
+            </div>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Hora extra (€)</label>
+              <input type="number" defaultValue="18" style={styles.input} />
+            </div>
+          </div>
+        </div>
+
+        <div style={styles.sectionCard}>
+          <h2 style={styles.sectionTitle}>+ Registrar jornada</h2>
+          <div style={styles.formRow}>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Fecha</label>
+              <input type="date" defaultValue="2026-10-28" style={styles.input} />
+            </div>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Tipo de día</label>
+              <select style={styles.select}>
+                <option>Día normal</option>
+                <option>Festivo</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={styles.formRow3}>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Entrada</label>
+              <input type="time" defaultValue="09:00" style={styles.input} />
+            </div>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Salida</label>
+              <input type="time" defaultValue="18:00" style={styles.input} />
+            </div>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Descanso (min)</label>
+              <input type="number" defaultValue="60" style={styles.input} />
+            </div>
+          </div>
+
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Categoría</label>
+            <select style={styles.select}>
+              <option>General</option>
+            </select>
+          </div>
+
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Notas del día</label>
+            <textarea placeholder="Detalles de la jornada..." style={styles.textarea}></textarea>
+          </div>
+
+          <button style={styles.saveBtn}>Guardar jornada</button>
+        </div>
+      </main>
+
+      <nav style={styles.bottomNav}>
+        <button
+          style={{ ...styles.navItem, color: activeTab === 'jornada' ? '#3b82f6' : '#9ca3af' }}
+          onClick={() => setActiveTab('jornada')}
+        >
+          <span style={styles.navIcon}>⏱️</span>
+          <span>Jornada</span>
+        </button>
+        <button
+          style={{ ...styles.navItem, color: activeTab === 'cobro' ? '#3b82f6' : '#9ca3af' }}
+          onClick={() => setActiveTab('cobro')}
+        >
+          <span style={styles.navIcon}>💶</span>
+          <span>Cobro</span>
+        </button>
+        <button
+          style={{ ...styles.navItem, color: activeTab === 'gastos' ? '#3b82f6' : '#9ca3af' }}
+          onClick={() => setActiveTab('gastos')}
+        >
+          <span style={styles.navIcon}>📊</span>
+          <span>Gastos</span>
+        </button>
+        <button
+          style={{ ...styles.navItem, color: activeTab === 'historial' ? '#3b82f6' : '#9ca3af' }}
+          onClick={() => setActiveTab('historial')}
+        >
+          <span style={styles.navIcon}>📅</span>
+          <span>Historial</span>
+        </button>
+      </nav>
+    </div>
+  );
 }
+
 const styles = {
   appContainer: {
     display: 'flex',
