@@ -1,337 +1,639 @@
+
 import React, { useState } from 'react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('jornada');
 
+  const tabs = [
+    { id: 'jornada', icon: '⏱️', label: 'Jornada' },
+    { id: 'cobro', icon: '💶', label: 'Cobro' },
+    { id: 'gastos', icon: '📊', label: 'Gastos' },
+    { id: 'historial', icon: '📅', label: 'Historial' },
+  ];
+
   return (
-    <div style={styles.appContainer}>
-      <header style={styles.header}>
-        <div style={styles.headerTitleGroup}>
-          <span style={styles.logoIcon}>W</span>
-          <div>
-            <h1 style={styles.headerTitle}>Work & Pay Pro</h1>
-            <p style={styles.headerSubtitle}>mié, 28 oct 2026</p>
+    <div className="app-container">
+      <header className="app-header">
+        <div className="header-title-group">
+          <span className="logo-icon">W</span>
+          <div className="header-text">
+            <h1>Work &amp; Pay Pro</h1>
+            <p>Control de horas y salario</p>
           </div>
         </div>
-        <button style={styles.backupBtn}>Respaldo</button>
+
+        <button className="backup-btn" type="button">
+          Respaldo
+        </button>
       </header>
 
-      <main style={styles.mainContent}>
-        <div style={styles.cardsRow}>
-          <div style={styles.card}>
-            <span style={styles.cardLabel}>A COBRAR</span>
-            <span style={styles.cardValue}>0,00 €</span>
-            <span style={styles.cardSubtext}>0,0 h acumuladas</span>
-          </div>
-          <div style={styles.card}>
-            <span style={styles.cardLabel}>DISPONIBLE</span>
-            <span style={styles.cardValue}>0,00 €</span>
-            <span style={styles.cardSubtext}>Cobrado menos gastos</span>
-          </div>
-        </div>
+      <main className="main-content">
+        <div className="content-inner">
+          {activeTab === 'jornada' && (
+            <>
+              <div className="cards-row">
+                <div className="summary-card">
+                  <span className="card-label">A COBRAR</span>
+                  <span className="card-value">0,00 €</span>
+                  <span className="card-subtext">
+                    0,0 h acumuladas
+                  </span>
+                </div>
 
-        <div style={styles.sectionCard}>
-          <h2 style={styles.sectionTitle}>Tarifas por hora</h2>
-          <div style={styles.ratesRow}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Hora normal (€)</label>
-              <input type="number" defaultValue="15" style={styles.input} />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Hora extra (€)</label>
-              <input type="number" defaultValue="18" style={styles.input} />
-            </div>
-          </div>
-        </div>
+                <div className="summary-card">
+                  <span className="card-label">DISPONIBLE</span>
+                  <span className="card-value">0,00 €</span>
+                  <span className="card-subtext">
+                    Cobrado menos gastos
+                  </span>
+                </div>
+              </div>
 
-        <div style={styles.sectionCard}>
-          <h2 style={styles.sectionTitle}>+ Registrar jornada</h2>
-          <div style={styles.formRow}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Fecha</label>
-              <input type="date" defaultValue="2026-10-28" style={styles.input} />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Tipo de día</label>
-              <select style={styles.select}>
-                <option>Día normal</option>
-                <option>Festivo</option>
-              </select>
-            </div>
-          </div>
+              <section className="section-card">
+                <h2>Tarifas por hora</h2>
 
-          <div style={styles.formRow3}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Entrada</label>
-              <input type="time" defaultValue="09:00" style={styles.input} />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Salida</label>
-              <input type="time" defaultValue="18:00" style={styles.input} />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Descanso (min)</label>
-              <input type="number" defaultValue="60" style={styles.input} />
-            </div>
-          </div>
+                <div className="rates-row">
+                  <div className="input-group">
+                    <label htmlFor="normal-rate">
+                      Hora normal (€)
+                    </label>
+                    <input
+                      id="normal-rate"
+                      type="number"
+                      defaultValue="15"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Categoría</label>
-            <select style={styles.select}>
-              <option>General</option>
-            </select>
-          </div>
+                  <div className="input-group">
+                    <label htmlFor="extra-rate">
+                      Hora extra (€)
+                    </label>
+                    <input
+                      id="extra-rate"
+                      type="number"
+                      defaultValue="18"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+              </section>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Notas del día</label>
-            <textarea placeholder="Detalles de la jornada..." style={styles.textarea}></textarea>
-          </div>
+              <section className="section-card">
+                <h2>+ Registrar jornada</h2>
 
-          <button style={styles.saveBtn}>Guardar jornada</button>
+                <div className="form-row">
+                  <div className="input-group">
+                    <label htmlFor="work-date">Fecha</label>
+                    <input
+                      id="work-date"
+                      type="date"
+                      defaultValue="2026-10-28"
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label htmlFor="day-type">Tipo de día</label>
+                    <select id="day-type" defaultValue="normal">
+                      <option value="normal">Día normal</option>
+                      <option value="festivo">Festivo</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-row form-row-three">
+                  <div className="input-group">
+                    <label htmlFor="entry-time">Entrada</label>
+                    <input
+                      id="entry-time"
+                      type="time"
+                      defaultValue="09:00"
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label htmlFor="exit-time">Salida</label>
+                    <input
+                      id="exit-time"
+                      type="time"
+                      defaultValue="18:00"
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label htmlFor="break-time">Descanso (min)</label>
+                    <input
+                      id="break-time"
+                      type="number"
+                      defaultValue="60"
+                      min="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label htmlFor="category">Categoría</label>
+                  <select id="category" defaultValue="general">
+                    <option value="general">General</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="incidencia">Incidencia</option>
+                  </select>
+                </div>
+
+                <div className="input-group">
+                  <label htmlFor="notes">Notas del día</label>
+                  <textarea
+                    id="notes"
+                    placeholder="Detalles de la jornada..."
+                    rows="3"
+                  />
+                </div>
+
+                <button className="save-btn" type="button">
+                  Guardar jornada
+                </button>
+              </section>
+            </>
+          )}
+
+          {activeTab === 'cobro' && (
+            <section className="section-card">
+              <h2>Cobro</h2>
+              <p className="placeholder-text">
+                Aquí irá el registro de cobros y pagos pendientes.
+              </p>
+            </section>
+          )}
+
+          {activeTab === 'gastos' && (
+            <section className="section-card">
+              <h2>Gastos</h2>
+              <p className="placeholder-text">
+                Aquí irá el registro de tus gastos.
+              </p>
+            </section>
+          )}
+
+          {activeTab === 'historial' && (
+            <section className="section-card">
+              <h2>Historial</h2>
+              <p className="placeholder-text">
+                Aquí aparecerá el historial de jornadas y movimientos.
+              </p>
+            </section>
+          )}
         </div>
       </main>
 
-      <nav style={styles.bottomNav}>
-        <button
-          style={{ ...styles.navItem, color: activeTab === 'jornada' ? '#3b82f6' : '#9ca3af' }}
-          onClick={() => setActiveTab('jornada')}
-        >
-          <span style={styles.navIcon}>⏱️</span>
-          <span>Jornada</span>
-        </button>
-        <button
-          style={{ ...styles.navItem, color: activeTab === 'cobro' ? '#3b82f6' : '#9ca3af' }}
-          onClick={() => setActiveTab('cobro')}
-        >
-          <span style={styles.navIcon}>💶</span>
-          <span>Cobro</span>
-        </button>
-        <button
-          style={{ ...styles.navItem, color: activeTab === 'gastos' ? '#3b82f6' : '#9ca3af' }}
-          onClick={() => setActiveTab('gastos')}
-        >
-          <span style={styles.navIcon}>📊</span>
-          <span>Gastos</span>
-        </button>
-        <button
-          style={{ ...styles.navItem, color: activeTab === 'historial' ? '#3b82f6' : '#9ca3af' }}
-          onClick={() => setActiveTab('historial')}
-        >
-          <span style={styles.navIcon}>📅</span>
-          <span>Historial</span>
-        </button>
+      <nav className="bottom-nav" aria-label="Navegación principal">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={`nav-item ${
+              activeTab === tab.id ? 'active' : ''
+            }`}
+            aria-current={activeTab === tab.id ? 'page' : undefined}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <span className="nav-icon" aria-hidden="true">
+              {tab.icon}
+            </span>
+            <span className="nav-label">{tab.label}</span>
+          </button>
+        ))}
       </nav>
+
+      <style>{`
+        * {
+          box-sizing: border-box;
+        }
+
+        html,
+        body,
+        #root {
+          width: 100%;
+          min-width: 0;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+
+        body {
+          overflow: hidden;
+          font-family: system-ui, -apple-system, sans-serif;
+          background: #0f172a;
+          color: #f8fafc;
+          -webkit-text-size-adjust: 100%;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+          font: inherit;
+        }
+
+        .app-container {
+          --header-height: 72px;
+          --nav-height: 68px;
+
+          position: relative;
+          isolation: isolate;
+          width: 100%;
+          max-width: 100%;
+          height: 100vh;
+          height: 100dvh;
+          min-height: 0;
+          margin: 0;
+          overflow: hidden;
+          background: #0f172a;
+          color: #f8fafc;
+        }
+
+        .app-header {
+          position: absolute;
+          z-index: 20;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: var(--header-height);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          padding: 8px 12px;
+          background: #1e293b;
+          border-bottom: 1px solid #334155;
+        }
+
+        .header-title-group {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          min-width: 0;
+        }
+
+        .logo-icon {
+          flex-shrink: 0;
+          display: grid;
+          place-items: center;
+          width: 34px;
+          height: 34px;
+          border-radius: 8px;
+          background: #3b82f6;
+          color: white;
+          font-weight: 800;
+          font-size: 18px;
+        }
+
+        .header-text {
+          min-width: 0;
+        }
+
+        .header-text h1 {
+          margin: 0;
+          font-size: 16px;
+          line-height: 1.3;
+          font-weight: 750;
+        }
+
+        .header-text p {
+          margin: 2px 0 0;
+          color: #94a3b8;
+          font-size: 11px;
+        }
+
+        .backup-btn {
+          flex-shrink: 0;
+          padding: 8px 10px;
+          border: 1px solid #475569;
+          border-radius: 7px;
+          background: transparent;
+          color: #f8fafc;
+          font-size: 12px;
+          cursor: pointer;
+        }
+
+        .main-content {
+          position: absolute;
+          top: var(--header-height);
+          right: 0;
+          bottom: calc(
+            var(--nav-height) + env(safe-area-inset-bottom, 0px)
+          );
+          left: 0;
+          width: 100%;
+          min-width: 0;
+          overflow-x: hidden;
+          overflow-y: auto;
+          overscroll-behavior-y: contain;
+          -webkit-overflow-scrolling: touch;
+          padding: 14px 12px 20px;
+          scrollbar-width: thin;
+          scrollbar-color: #475569 #0f172a;
+        }
+
+        .content-inner {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 14px;
+          width: 100%;
+          min-width: 0;
+          margin: 0 auto;
+        }
+
+        .cards-row {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          width: 100%;
+          min-width: 0;
+        }
+
+        .summary-card {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          min-width: 0;
+          padding: 12px 10px;
+          border: 1px solid #334155;
+          border-radius: 10px;
+          background: #1e293b;
+        }
+
+        .card-label {
+          color: #94a3b8;
+          font-size: 10px;
+          font-weight: 750;
+          letter-spacing: 0.3px;
+        }
+
+        .card-value {
+          color: #38bdf8;
+          font-size: clamp(16px, 4.5vw, 21px);
+          font-weight: 750;
+          overflow-wrap: anywhere;
+        }
+
+        .card-subtext {
+          color: #94a3b8;
+          font-size: 10px;
+          line-height: 1.4;
+          overflow-wrap: anywhere;
+        }
+
+        .section-card {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 14px;
+          width: 100%;
+          min-width: 0;
+          padding: 15px 12px;
+          border: 1px solid #334155;
+          border-radius: 10px;
+          background: #1e293b;
+        }
+
+        .section-card h2 {
+          margin: 0;
+          color: #e2e8f0;
+          font-size: 15px;
+          line-height: 1.4;
+          font-weight: 750;
+          overflow-wrap: anywhere;
+        }
+
+        .rates-row,
+        .form-row {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          width: 100%;
+          min-width: 0;
+        }
+
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          min-width: 0;
+          width: 100%;
+        }
+
+        .input-group label {
+          color: #cbd5e1;
+          font-size: 12px;
+          line-height: 1.4;
+          overflow-wrap: anywhere;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+          display: block;
+          width: 100%;
+          min-width: 0;
+          max-width: 100%;
+          padding: 10px;
+          border: 1px solid #475569;
+          border-radius: 7px;
+          background: #0f172a;
+          color: #f8fafc;
+          font-size: 14px;
+          line-height: 1.4;
+          color-scheme: dark;
+        }
+
+        .input-group input,
+        .input-group select {
+          min-height: 42px;
+        }
+
+        .input-group textarea {
+          min-height: 76px;
+          resize: vertical;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+          outline: 2px solid #3b82f6;
+          outline-offset: 1px;
+          border-color: #3b82f6;
+        }
+
+        .save-btn {
+          width: 100%;
+          min-height: 46px;
+          margin-top: 2px;
+          padding: 12px;
+          border: 0;
+          border-radius: 8px;
+          background: #2563eb;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 750;
+          cursor: pointer;
+        }
+
+        .placeholder-text {
+          margin: 0;
+          color: #94a3b8;
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
+        .bottom-nav {
+          position: absolute;
+          z-index: 30;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          align-items: stretch;
+          width: 100%;
+          height: calc(
+            var(--nav-height) + env(safe-area-inset-bottom, 0px)
+          );
+          padding: 5px 4px env(safe-area-inset-bottom, 0px);
+          border-top: 1px solid #334155;
+          background: #1e293b;
+        }
+
+        .nav-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          min-width: 0;
+          padding: 4px 1px;
+          border: 0;
+          border-radius: 8px;
+          background: transparent;
+          color: #94a3b8;
+          cursor: pointer;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-item.active {
+          color: #60a5fa;
+          background: #26364d;
+        }
+
+        .nav-icon {
+          font-size: 19px;
+          line-height: 1.2;
+        }
+
+        .nav-label {
+          max-width: 100%;
+          font-size: 11px;
+          line-height: 1.3;
+          font-weight: 650;
+          text-align: center;
+          overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 360px) {
+          .app-container {
+            --header-height: 68px;
+            --nav-height: 64px;
+          }
+
+          .app-header {
+            padding-right: 8px;
+            padding-left: 8px;
+          }
+
+          .header-title-group {
+            gap: 7px;
+          }
+
+          .logo-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+          }
+
+          .header-text h1 {
+            font-size: 14px;
+          }
+
+          .header-text p {
+            font-size: 10px;
+          }
+
+          .backup-btn {
+            padding: 7px;
+            font-size: 11px;
+          }
+
+          .main-content {
+            padding-right: 8px;
+            padding-left: 8px;
+          }
+
+          .section-card {
+            padding: 12px 10px;
+          }
+
+          .rates-row,
+          .form-row {
+            gap: 8px;
+          }
+
+          .input-group input,
+          .input-group select,
+          .input-group textarea {
+            padding: 9px 7px;
+            font-size: 13px;
+          }
+
+          .nav-label {
+            font-size: 10px;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .form-row-three {
+            grid-template-columns: minmax(0, 1fr);
+          }
+        }
+
+        @media (min-width: 700px) {
+          .main-content {
+            padding: 20px;
+          }
+
+          .content-inner {
+            max-width: 760px;
+          }
+
+          .section-card {
+            padding: 20px;
+          }
+
+          .bottom-nav {
+            padding-right: max(4px, calc((100vw - 760px) / 2));
+            padding-left: max(4px, calc((100vw - 760px) / 2));
+          }
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+          .nav-item,
+          .save-btn {
+            transition: background-color 0.15s ease;
+          }
+        }
+      `}</style>
     </div>
   );
 }
-
-const styles = {
-  appContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    height: '100dvh',
-    width: '100%',
-    maxWidth: '100vw',
-    backgroundColor: '#0f172a',
-    color: '#f8fafc',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '12px 16px',
-    backgroundColor: '#1e293b',
-    borderBottom: '1px solid #334155',
-    flexShrink: 0,
-    width: '100%',
-    boxSizing: 'border-box',
-    margin: 0,
-  },
-  headerTitleGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  logoIcon: {
-    backgroundColor: '#3b82f6',
-    color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: '18px',
-    borderRadius: '6px',
-    padding: '4px 8px',
-  },
-  headerTitle: {
-    fontSize: '16px',
-    fontWeight: 'bold',
-    margin: 0,
-  },
-  headerSubtitle: {
-    fontSize: '12px',
-    color: '#94a3b8',
-    margin: 0,
-  },
-  backupBtn: {
-    backgroundColor: 'transparent',
-    border: '1px solid #475569',
-    color: '#f8fafc',
-    padding: '6px 12px',
-    borderRadius: '6px',
-    fontSize: '13px',
-    cursor: 'pointer',
-  },
-  mainContent: {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '16px',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  cardsRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
-    width: '100%',
-    maxWidth: '100%',
-    boxSizing: 'border-box',
-  },
-  card: {
-    backgroundColor: '#1e293b',
-    padding: '12px',
-    borderRadius: '8px',
-    border: '1px solid #334155',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  cardLabel: {
-    fontSize: '10px',
-    color: '#94a3b8',
-    fontWeight: 'bold',
-  },
-  cardValue: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#38bdf8',
-  },
-  cardSubtext: {
-    fontSize: '11px',
-    color: '#64748b',
-  },
-  sectionCard: {
-    backgroundColor: '#1e293b',
-    padding: '16px',
-    borderRadius: '8px',
-    border: '1px solid #334155',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    width: '100%',
-    maxWidth: '100%',
-    boxSizing: 'border-box',
-  },
-  sectionTitle: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    margin: 0,
-    color: '#e2e8f0',
-  },
-  ratesRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
-  },
-  formRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
-  },
-  formRow3: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr',
-    gap: '8px',
-  },
-  inputGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  },
-  label: {
-    fontSize: '11px',
-    color: '#94a3b8',
-  },
-  input: {
-    backgroundColor: '#0f172a',
-    border: '1px solid #334155',
-    borderRadius: '6px',
-    color: '#f8fafc',
-    padding: '8px',
-    fontSize: '13px',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  select: {
-    backgroundColor: '#0f172a',
-    border: '1px solid #334155',
-    borderRadius: '6px',
-    color: '#f8fafc',
-    padding: '8px',
-    fontSize: '13px',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  textarea: {
-    backgroundColor: '#0f172a',
-    border: '1px solid #334155',
-    borderRadius: '6px',
-    color: '#f8fafc',
-    padding: '8px',
-    fontSize: '13px',
-    minHeight: '60px',
-    resize: 'vertical',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  saveBtn: {
-    backgroundColor: '#2563eb',
-    color: '#ffffff',
-    border: 'none',
-    padding: '12px',
-    borderRadius: '6px',
-    fontWeight: 'bold',
-    fontSize: '14px',
-    cursor: 'pointer',
-    marginTop: '8px',
-  },
-  bottomNav: {
-    display: 'flex',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#1e293b',
-    borderTop: '1px solid #334155',
-    padding: '8px 0',
-    flexShrink: 0,
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  navItem: {
-    background: 'none',
-    border: 'none',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '2px',
-    fontSize: '11px',
-    cursor: 'pointer',
-  },
-  navIcon: {
-    fontSize: '16px',
-  },
-};
+                    
