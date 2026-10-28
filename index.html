@@ -1,34 +1,319 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0",viewport-fit=cover"><meta name="theme-color" content="#0f172a"><meta name="description" content="Control personal de jornadas, cobros y gastos"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><title>Work & Pay Pro</title>
-<style>
-:root{color-scheme:dark;--bg:#0f172a;--panel:#1e293b;--line:#334155;--muted:#94a3b8;--blue:#2563eb;--green:#059669;--red:#e11d48;--amber:#f59e0b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f1f5f9;font:16px system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:86px}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:11px 13px;color:white;background:var(--blue);font-weight:650}button:active{transform:scale(.99)}input,select,textarea{width:100%;background:#0f172a;color:white;border:1px solid var(--line);border-radius:10px;padding:10px;min-width:0}label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}header{position:sticky;top:0;z-index:5;background:#1e293bf2;border-bottom:1px solid var(--line);padding:12px 16px;backdrop-filter:blur(12px)}.head,.wrap{max-width:560px;margin:auto}.head{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:10px}.logo{width:42px;height:42px;border-radius:13px;background:var(--blue);display:grid;place-items:center;font-weight:900;font-size:22px}.sub{font-size:12px;color:var(--muted)}.wrap{padding:15px;display:grid;gap:14px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.panel,.stat{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px}.stat small{color:var(--muted);display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em}.stat strong{display:block;font-size:clamp(19px,5vw,26px);margin:4px 0}.amber{color:#fbbf24}.green{color:#34d399}.red{color:#fb7185}.panel h2{font-size:15px;margin:0 0 13px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.field{margin-bottom:11px}.field:last-child{margin-bottom:0}.primary{width:100%;margin-top:4px}.greenbtn{background:var(--green)}.redbtn{background:var(--red)}.secondary{background:#334155}.tab{display:none;gap:14px}.tab.active{display:grid}.nav{position:fixed;bottom:0;left:0;right:0;z-index:6;background:#1e293bf5;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom));backdrop-filter:blur(12px)}.nav button{background:transparent;color:var(--muted);padding:5px 2px;font-size:11px;font-weight:500}.nav button.active{color:#60a5fa}.nav span{display:block;font-size:20px;margin-bottom:3px}.item{background:#0f172a;border:1px solid #334155;border-radius:12px;padding:11px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}.item .details{min-width:0}.item strong{font-size:14px}.item small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.item button{font-size:11px;padding:8px}.pill{font-size:10px;border-radius:6px;padding:4px 6px;background:#78350f;color:#fcd34d}.pill.paid{background:#064e3b;color:#6ee7b7}.empty{color:#64748b;text-align:center;padding:18px;font-size:13px}.note{color:var(--muted);font-size:12px;line-height:1.5}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}.hidden{display:none!important}@media(min-width:560px){body{padding-bottom:25px}.nav{position:static;max-width:560px;margin:0 auto 15px;border:1px solid var(--line);border-radius:15px}}
-</style></head><body>
-<header><div class="head"><div class="brand"><div class="logo">W</div><div><strong>Work & Pay Pro</strong><div class="sub" id="today"></div></div></div><button class="secondary" id="backup-top" type="button">↓ Respaldo</button></div></header>
-<main class="wrap"><section class="stats"><div class="stat"><small class="amber">◷ A cobrar</small><strong id="pending-money">0,00 €</strong><span class="sub" id="pending-hours">0,0 h acumuladas</span></div><div class="stat"><small class="green">▣ Disponible</small><strong id="balance">0,00 €</strong><span class="sub">Cobrado menos gastos</span></div></section>
-<section id="tab-work" class="tab active"><div class="panel"><h2>⚙ Tarifas por hora</h2><div class="grid2"><div><label for="rate-normal">Hora normal (€)</label><input type="number" min="0" step="0.5" id="rate-normal" value="15"></div><div><label for="rate-extra">Hora extra (€)</label><input type="number" min="0" step="0.5" id="rate-extra" value="18"></div></div></div>
-<div class="panel"><h2>＋ Registrar jornada</h2><form id="work-form"><div class="grid2"><div class="field"><label for="work-date">Fecha</label><input type="date" id="work-date" required></div><div class="field"><label for="day-type">Tipo de día</label><select id="day-type"><option value="normal">Día normal</option><option value="extra_full">Día extra</option><option value="free_day">Día libre / franco</option></select></div></div><div class="grid3" id="hours-box"><div class="field"><label for="time-in">Entrada</label><input type="time" id="time-in" value="09:00"></div><div class="field"><label for="time-out">Salida</label><input type="time" id="time-out" value="18:00"></div><div class="field"><label for="break-minutes">Descanso (min)</label><input type="number" min="0" id="break-minutes" value="60"></div></div><div class="field"><label for="work-category">Categoría</label><select id="work-category"><option>General</option><option>Pendiente</option><option>Incidencia</option></select></div><div class="field"><label for="work-notes">Notas del día</label><textarea id="work-notes" rows="2" placeholder="Detalles de la jornada..."></textarea></div><button class="primary" type="submit">Guardar jornada</button></form></div></section>
-<section id="tab-payout" class="tab"><div class="panel"><div class="head" style="padding:0"><div><h2 style="margin:0">Liquidación de sueldo</h2><div class="sub">Jornadas pendientes por cobrar</div></div><button id="payout-all" class="greenbtn">Cobrar todo</button></div><div id="pending-list"></div></div></section>
-<section id="tab-finance" class="tab"><div class="panel"><h2>− Registrar gasto</h2><form id="expense-form"><div class="grid2"><div class="field"><label for="expense-amount">Monto (€)</label><input type="number" min="0.01" step="0.01" id="expense-amount" required placeholder="0,00"></div><div class="field"><label for="expense-category">Categoría</label><select id="expense-category"><option>Supermercado</option><option>Servicios</option><option>Transporte</option><option>Ocio</option><option>Varios</option></select></div></div><div class="field"><label for="expense-desc">Descripción</label><input id="expense-desc" placeholder="Ej.: abono transporte"></div><button class="primary redbtn" type="submit">Guardar gasto</button></form></div><div class="panel"><h2>Historial de gastos</h2><div id="expense-list"></div></div></section>
-<section id="tab-history" class="tab"><div class="panel"><div class="head" style="padding:0"><h2 style="margin:0">Historial de jornadas</h2><select id="history-filter" style="width:auto"><option value="all">Todos</option><option value="pending">A cobrar</option><option value="paid">Cobrados</option></select></div><div id="history-list"></div></div><div class="panel"><h2>Datos y copias de seguridad</h2><p class="note">Tus registros se guardan en este dispositivo. Exportá una copia periódicamente y guardala en un lugar seguro. Para recuperar una copia, usá el botón de importar.</p><div class="actions"><button id="backup-bottom" class="secondary">Exportar copia</button><button id="import-button" class="secondary">Importar copia</button><input type="file" id="import-file" accept="application/json,.json" class="hidden"></div><p class="note" id="data-message" role="status"></p></div></section>
-</main><nav class="nav"><button data-tab="work" class="active"><span>◷</span>Jornada</button><button data-tab="payout"><span>€</span>Cobro</button><button data-tab="finance"><span>▤</span>Gastos</button><button data-tab="history"><span>☷</span>Historial</button></nav>
-<script>
-'use strict';
-const KEY='work_pay_pwa_data';let state={entries:[],expenses:[],rateNormal:15,rateExtra:18,lastAutoBackupDate:null};const $=id=>document.getElementById(id);const euro=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(Number(n)||0);const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function loadState(){try{const raw=localStorage.getItem(KEY);if(raw){const x=JSON.parse(raw);state={...state,...x};if(!Array.isArray(state.entries))state.entries=[];if(!Array.isArray(state.expenses))state.expenses=[];}}catch(e){$('data-message').textContent='No se pudieron leer los datos guardados.';} $('rate-normal').value=state.rateNormal;$('rate-extra').value=state.rateExtra;}
-function saveState(){state.rateNormal=Number($('rate-normal').value)||0;state.rateExtra=Number($('rate-extra').value)||0;try{localStorage.setItem(KEY,JSON.stringify(state));renderAll();}catch(e){alert('No se pudieron guardar los datos. Exportá una copia y liberá espacio en el navegador.');}}
-function backup(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`respaldo_work_pay_${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);$('data-message').textContent='Copia exportada. Guardala fuera del navegador.';}
-function switchTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.id==='tab-'+id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));}
-document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));$('backup-top').addEventListener('click',backup);$('backup-bottom').addEventListener('click',backup);$('rate-normal').addEventListener('change',saveState);$('rate-extra').addEventListener('change',saveState);
-$('day-type').addEventListener('change',()=>{$('hours-box').classList.toggle('hidden',$('day-type').value==='free_day');});
-$('work-form').addEventListener('submit',e=>{e.preventDefault();const date=$('work-date').value,dayType=$('day-type').value,timeIn=$('time-in').value,timeOut=$('time-out').value,breakMins=Math.max(0,Number($('break-minutes').value)||0);let hoursWorked=0;if(dayType!=='free_day'){const [ih,im]=timeIn.split(':').map(Number),[oh,om]=timeOut.split(':').map(Number);let mins=(oh*60+om)-(ih*60+im);if(mins<0)mins+=1440;mins=Math.max(0,mins-breakMins);hoursWorked=mins/60;}const pay=hoursWorked*(dayType==='extra_full'?state.rateExtra:state.rateNormal);state.entries.unshift({id:Date.now(),date,dayType,timeIn,timeOut,breakMins,hoursWorked,pay,category:$('work-category').value,notes:$('work-notes').value,status:'pending'});saveState();$('work-notes').value='';$('data-message').textContent='Jornada guardada.';});
-$('expense-form').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('expense-amount').value);if(!(amount>0))return;const category=$('expense-category').value;state.expenses.unshift({id:Date.now(),date:new Date().toLocaleDateString('en-CA'),amount,category,desc:$('expense-desc').value.trim()||category});saveState();$('expense-amount').value='';$('expense-desc').value='';$('data-message').textContent='Gasto guardado.';});
-function payout(id){const item=state.entries.find(x=>x.id===id);if(item)item.status='paid';saveState();} $('payout-all').addEventListener('click',()=>{state.entries.forEach(x=>{if(x.status==='pending')x.status='paid'});saveState();});$('history-filter').addEventListener('change',renderHistory);
-function renderStats(){const pending=state.entries.filter(x=>x.status==='pending');$('pending-money').textContent=euro(pending.reduce((s,x)=>s+(Number(x.pay)||0),0));$('pending-hours').textContent=`${pending.reduce((s,x)=>s+(Number(x.hoursWorked)||0),0).toFixed(1).replace('.',',')} h acumuladas`;$('balance').textContent=euro(state.entries.filter(x=>x.status==='paid').reduce((s,x)=>s+(Number(x.pay)||0),0)-state.expenses.reduce((s,x)=>s+(Number(x.amount)||0),0));}
-function renderPending(){const list=$('pending-list'),items=state.entries.filter(x=>x.status==='pending');list.innerHTML=items.length?items.map(x=>`<div class="item"><div class="details"><strong>${safe(x.date)} · ${x.dayType==='free_day'?'Día libre':Number(x.hoursWorked).toFixed(1)+' h'}</strong><small>${safe(x.category||'General')} · ${euro(x.pay)}${x.notes?' · '+safe(x.notes):''}</small></div><button class="greenbtn" data-pay="${Number(x.id)}">Cobrar</button></div>`).join(''):'<div class="empty">Sin jornadas pendientes por cobrar.</div>';list.querySelectorAll('[data-pay]').forEach(b=>b.addEventListener('click',()=>payout(Number(b.dataset.pay))));}
-function renderExpenses(){const list=$('expense-list');list.innerHTML=state.expenses.length?state.expenses.slice(0,30).map(x=>`<div class="item"><div class="details"><strong>${safe(x.desc||x.category)}</strong><small>${safe(x.date)} · ${safe(x.category)}</small></div><strong class="red">−${euro(x.amount)}</strong></div>`).join(''):'<div class="empty">Sin gastos registrados.</div>';}
-function renderHistory(){const f=$('history-filter').value;let items=state.entries;if(f==='pending'||f==='paid')items=items.filter(x=>x.status===f);$('history-list').innerHTML=items.length?items.map(x=>`<div class="item"><div class="details"><strong>${safe(x.date)} · ${x.dayType==='free_day'?'Día libre':Number(x.hoursWorked).toFixed(1)+' h'}</strong><small>${safe(x.category||'General')} · ${euro(x.pay)}${x.notes?' · '+safe(x.notes):''}</small></div><span class="pill ${x.status==='paid'?'paid':''}">${x.status==='paid'?'COBRADO':'A COBRAR'}</span></div>`).join(''):'<div class="empty">No hay registros para mostrar.</div>';}
-function renderAll(){renderStats();renderPending();renderExpenses();renderHistory();} $('import-button').addEventListener('click',()=>$('import-file').click());$('import-file').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const x=JSON.parse(await file.text());if(!Array.isArray(x.entries)||!Array.isArray(x.expenses))throw Error('Formato');if(!confirm('Importar reemplazará los datos actuales. ¿Continuar?'))return;state={...state,...x};saveState();$('data-message').textContent='Copia importada correctamente.';}catch(err){alert('El archivo no parece una copia válida de Work & Pay Pro.');}finally{e.target.value='';}});
-$('today').textContent=new Intl.DateTimeFormat('es-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(new Date());$('work-date').value=new Date().toLocaleDateString('en-CA');loadState();renderAll();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script></body></html>
+jsx
+import React, { useState } from 'react';
+​export default function App() {
+const [activeTab, setActiveTab] = useState('jornada');
+​return (
+<div style={styles.appContainer}>
+<header style={styles.header}>
+<div style={styles.headerTitleGroup}>
+<span style={styles.logoIcon}>W</span>
+<div>
+<h1 style={styles.headerTitle}>Work & Pay Pro</h1>
+<p style={styles.headerSubtitle}>mié, 28 oct 2026</p>
+</div>
+</div>
+<button style={styles.backupBtn}>↓ Respaldo</button>
+</header>
+​<main style={styles.mainContent}>
+<div style={styles.cardsRow}>
+<div style={styles.card}>
+<span style={styles.cardLabel}>A COBRAR</span>
+<span style={styles.cardValue}>0,00 €</span>
+<span style={styles.cardSubtext}>0,0 h acumuladas</span>
+</div>
+<div style={styles.card}>
+<span style={styles.cardLabel}>DISPONIBLE</span>
+<span style={styles.cardValue}>0,00 €</span>
+<span style={styles.cardSubtext}>Cobrado menos gastos</span>
+</div>
+</div>
+​<div style={styles.sectionCard}>
+<h2 style={styles.sectionTitle}>Tarifas por hora</h2>
+<div style={styles.ratesRow}>
+<div style={styles.inputGroup}>
+<label style={styles.label}>Hora normal (€)</label>
+<input type="number" defaultValue="15" style={styles.input} />
+</div>
+<div style={styles.inputGroup}>
+<label style={styles.label}>Hora extra (€)</label>
+<input type="number" defaultValue="18" style={styles.input} />
+</div>
+</div>
+</div>
+​<div style={styles.sectionCard}>
+<h2 style={styles.sectionTitle}>+ Registrar jornada</h2>
+<div style={styles.formRow}>
+<div style={styles.inputGroup}>
+<label style={styles.label}>Fecha</label>
+<input type="date" defaultValue="2026-10-28" style={styles.input} />
+</div>
+<div style={styles.inputGroup}>
+<label style={styles.label}>Tipo de día</label>
+<select style={styles.select}>
+<option>Día normal</option>
+<option>Festivo</option>
+</select>
+</div>
+</div>
+​<div style={styles.formRow3}>
+<div style={styles.inputGroup}>
+<label style={styles.label}>Entrada</label>
+<input type="time" defaultValue="09:00" style={styles.input} />
+</div>
+<div style={styles.inputGroup}>
+<label style={styles.label}>Salida</label>
+<input type="time" defaultValue="18:00" style={styles.input} />
+</div>
+<div style={styles.inputGroup}>
+<label style={styles.label}>Descanso (min)</label>
+<input type="number" defaultValue="60" style={styles.input} />
+</div>
+</div>
+​<div style={styles.inputGroup}>
+<label style={styles.label}>Categoría</label>
+<select style={styles.select}>
+<option>General</option>
+</select>
+</div>
+​<div style={{ ...styles.inputGroup, marginTop: '10px' }}>
+<label style={styles.label}>Notas del día</label>
+<textarea placeholder="Detalles de la jornada..." style={styles.textarea}></textarea>
+</div>
+​<button style={styles.saveBtn}>Guardar jornada</button>
+</div>
+</main>
+​<nav style={styles.bottomNav}>
+<button
+style={{ ...styles.navItem, color: activeTab === 'jornada' ? '#3b82f6' : '#9ca3af' }}
+onClick={() => setActiveTab('jornada')}
+>
+<span style={styles.navIcon}>⏱</span>
+<span>Jornada</span>
+</button>
+<button
+style={{ ...styles.navItem, color: activeTab === 'cobro' ? '#3b82f6' : '#9ca3af' }}
+onClick={() => setActiveTab('cobro')}
+>
+<span style={styles.navIcon}>€</span>
+<span>Cobro</span>
+</button>
+<button
+style={{ ...styles.navItem, color: activeTab === 'gastos' ? '#3b82f6' : '#9ca3af' }}
+onClick={() => setActiveTab('gastos')}
+>
+<span style={styles.navIcon}>📊</span>
+<span>Gastos</span>
+</button>
+<button
+style={{ ...styles.navItem, color: activeTab === 'historial' ? '#3b82f6' : '#9ca3af' }}
+onClick={() => setActiveTab('historial')}
+>
+<span style={styles.navIcon}>📅</span>
+<span>Historial</span>
+</button>
+</nav>
+</div>
+);
+}
+​const styles = {
+appContainer: {
+display: 'flex',
+flexDirection: 'column',
+height: '100vh',
+height: '100dvh',
+width: '100%',
+maxWidth: '100vw',
+backgroundColor: '#0f172a',
+color: '#f8fafc',
+fontFamily: 'system-ui, -apple-system, sans-serif',
+overflow: 'hidden',
+boxSizing: 'border-box',
+},
+header: {
+display: 'flex',
+alignItems: 'center',
+justifyContent: 'space-between',
+padding: '12px 16px',
+backgroundColor: '#1e293b',
+borderBottom: '1px solid #334155',
+flexShrink: 0,
+width: '100%',
+boxSizing: 'border-box',
+},
+headerTitleGroup: {
+display: 'flex',
+alignItems: 'center',
+gap: '10px',
+},
+logoIcon: {
+backgroundColor: '#3b82f6',
+color: '#ffffff',
+fontWeight: 'bold',
+fontSize: '18px',
+borderRadius: '6px',
+padding: '4px 8px',
+},
+headerTitle: {
+fontSize: '16px',
+fontWeight: 'bold',
+margin: 0,
+},
+headerSubtitle: {
+fontSize: '12px',
+color: '#94a3b8',
+margin: 0,
+},
+backupBtn: {
+backgroundColor: 'transparent',
+border: '1px solid #475569',
+color: '#f8fafc',
+padding: '6px 12px',
+borderRadius: '6px',
+fontSize: '13px',
+cursor: 'pointer',
+},
+mainContent: {
+flex: 1,
+overflowY: 'auto',
+padding: '16px',
+display: 'flex',
+flexDirection: 'column',
+gap: '16px',
+boxSizing: 'border-box',
+},
+cardsRow: {
+display: 'grid',
+gridTemplateColumns: '1fr 1fr',
+gap: '12px',
+width: '100%',
+},
+card: {
+backgroundColor: '#1e293b',
+padding: '12px',
+borderRadius: '8px',
+border: '1px solid #334155',
+display: 'flex',
+flexDirection: 'column',
+gap: '4px',
+},
+cardLabel: {
+fontSize: '10px',
+color: '#94a3b8',
+fontWeight: 'bold',
+},
+cardValue: {
+fontSize: '18px',
+fontWeight: 'bold',
+color: '#38bdf8',
+},
+cardSubtext: {
+fontSize: '11px',
+color: '#64748b',
+},
+sectionCard: {
+backgroundColor: '#1e293b',
+padding: '16px',
+borderRadius: '8px',
+border: '1px solid #334155',
+display: 'flex',
+flexDirection: 'column',
+gap: '12px',
+},
+sectionTitle: {
+fontSize: '14px',
+fontWeight: 'bold',
+margin: 0,
+color: '#e2e8f0',
+},
+ratesRow: {
+display: 'grid',
+gridTemplateColumns: '1fr 1fr',
+gap: '12px',
+},
+formRow: {
+display: 'grid',
+gridTemplateColumns: '1fr 1fr',
+gap: '12px',
+},
+formRow3: {
+display: 'grid',
+gridTemplateColumns: '1fr 1fr 1fr',
+gap: '8px',
+},
+inputGroup: {
+display: 'flex',
+flexDirection: 'column',
+gap: '4px',
+},
+label: {
+fontSize: '11px',
+color: '#94a3b8',
+},
+input: {
+backgroundColor: '#0f172a',
+border: '1px solid #334155',
+borderRadius: '6px',
+color: '#f8fafc',
+padding: '8px',
+fontSize: '13px',
+width: '100%',
+boxSizing: 'border-box',
+},
+select: {
+backgroundColor: '#0f172a',
+border: '1px solid #334155',
+borderRadius: '6px',
+color: '#f8fafc',
+padding: '8px',
+fontSize: '13px',
+width: '100%',
+boxSizing: 'border-box',
+},
+textarea: {
+backgroundColor: '#0f172a',
+border: '1px solid #334155',
+borderRadius: '6px',
+color: '#f8fafc',
+padding: '8px',
+fontSize: '13px',
+minHeight: '60px',
+resize: 'vertical',
+width: '100%',
+boxSizing: 'border-box',
+},
+saveBtn: {
+backgroundColor: '#2563eb',
+color: '#ffffff',
+border: 'none',
+padding: '12px',
+borderRadius: '6px',
+fontWeight: 'bold',
+fontSize: '14px',
+cursor: 'pointer',
+marginTop: '8px',
+},
+bottomNav: {
+display: 'flex',
+justifyContent: 'space-around',
+alignItems: 'center',
+backgroundColor: '#1e293b',
+borderTop: '1px solid #334155',
+padding: '8px 0',
+flexShrink: 0,
+width: '100%',
+boxSizing: 'border-box',
+},
+navItem: {
+background: 'none',
+border: 'none',
+display: 'flex',
+flexDirection: 'column',
+alignItems: 'center',
+gap: '2px',
+fontSize: '11px',
+cursor: 'pointer',
+},
+navIcon: {
+fontSize: '16px',
+},
+};
