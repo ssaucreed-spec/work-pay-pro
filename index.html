@@ -1,341 +1,773 @@
-import React, { useState } from 'react';
+```react
+import React, { useState, useEffect, useMemo } from 'react';
+
+// Sample initial data if localStorage is empty
+const INITIAL_JORNADAS = [
+  {
+    id: '1',
+    fecha: '2026-10-27',
+    tipoDia: 'Día normal',
+    entrada: '08:00',
+    salida: '17:00',
+    descanso: 60,
+    categoria: 'General',
+    notas: 'Instalación de servidor en cliente A',
+    horasNormales: 8,
+    horasExtra: 0,
+    monto: 120,
+    cobrado: true
+  },
+  {
+    id: '2',
+    fecha: '2026-10-28',
+    tipoDia: 'Festivo',
+    entrada: '09:00',
+    salida: '19:00',
+    descanso: 60,
+    categoria: 'Urgencia',
+    notas: 'Soporte técnico de emergencia',
+    horasNormales: 8,
+    horasExtra: 1,
+    monto: 138, // 8 * 15 + 1 * 18
+    cobrado: false
+  }
+];
+
+const INITIAL_GASTOS = [
+  {
+    id: '101',
+    fecha: '2026-10-27',
+    concepto: 'Dieta / Comida',
+    monto: 14.50,
+    categoria: 'Alimentación'
+  },
+  {
+    id: '102',
+    fecha: '2026-10-28',
+    concepto: 'Gasolina desplazamiento',
+    monto: 25.00,
+    categoria: 'Transporte'
+  }
+];
+
+const INITIAL_COBROS = [
+  {
+    id: '201',
+    fecha: '2026-10-27',
+    monto: 120.00,
+    metodo: 'Transferencia',
+    nota: 'Pago jornada del 27'
+  }
+];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('jornada');
+  // Navigation State
+  const [activeTab, setActiveTab] = useState('jornada'); // 'jornada' | 'cobro' | 'gastos' | 'historial'
+
+  // Persistent App State with LocalStorage
+  const [tarifas, setTarifas] = useState(() => {
+    const saved = localStorage.getItem('wpp_tarifas');
+    return saved ? JSON.parse(saved) : { horaNormal: 15, horaExtra: 18, horasPorJornada: 8 };
+  });
+
+  const [jornadas, setJornadas] = useState(() => {
+    const saved = localStorage.getItem('wpp_jornadas');
+    return saved ? JSON.parse(saved) : INITIAL_JORNADAS;
+  });
+
+  const [gastos, setGastos] = useState(() => {
+    const saved = localStorage.getItem('wpp_gastos');
+    return saved ? JSON.parse(saved) : INITIAL_GASTOS;
+  });
+
+  const [cobros, setCobros] = useState(() => {
+    const saved = localStorage.getItem('wpp_cobros');
+    return saved ? JSON.parse(saved) : INITIAL_COBROS;
+  });
+
+  // Modal / Toast Notification State
+  const [toastMessage, setToastMessage] = useState(null);
+  const [showBackupModal, setShowBackupModal] = useState(false);
+
+  // Sync with LocalStorage
+  useEffect(() => {
+    localStorage.setItem('wpp_tarifas', JSON.stringify(tarifas));
+  }, [tarifas]);
+
+  useEffect(() => {
+    localStorage.setItem('wpp_jornadas', JSON.stringify(jornadas));
+  }, [jornadas]);
+
+  useEffect(() => {
+    localStorage.setItem('wpp_gastos', JSON.stringify(gastos));
+  }, [gastos]);
+
+  useEffect(() => {
+    localStorage.setItem('wpp_cobros', JSON.stringify(cobros));
+  }, [cobros]);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
+  // Calculated KPI Metrics
+  const metrics = useMemo(() => {
+    // Total Ganado en Jornadas
+    const totalGanado = jornadas.reduce((acc, j) => acc + (j.monto || 0), 0);
+    
+    // Total Horas Trabajadas
+    const totalHoras = jornadas.reduce((acc, j) => acc + (j.horasNormales || 0) + (j.horasExtra || 0), 0);
+
+    // Total Cobrado
+    const totalCobrado = cobros.reduce((acc, c) => acc + (c.monto || 0), 0);
+
+    // Total Gastos
+    const totalGastos = gastos.reduce((acc, g) => acc + (g.monto || 0), 0);
+
+    // Pendiente de Cobrar
+    const aCobrar = Math.max(0, totalGanado - totalCobrado);
+
+    // Disponible Real (Cobrado real menos gastos efectuados)
+    const disponibleNeto = totalCobrado - totalGastos;
+
+    return {
+      totalGanado,
+      totalHoras,
+      totalCobrado,
+      totalGastos,
+      aCobrar,
+      disponibleNeto
+    };
+  }, [jornadas, cobros, gastos]);
+
+  // Form State for "Registrar Jornada"
+  const [formJornada, setFormJornada] = useState({
+    fecha: new Date().toISOString().split('T')[0],
+    tipoDia: 'Día normal',
+    entrada: '09:00',
+    salida: '18:00',
+    descanso: 60,
+    categoria: 'General',
+    notas: ''
+  });
+
+  // Form State for "Añadir Gasto"
+  const [formGasto, setFormGasto] = useState({
+    fecha: new Date().toISOString().split('T')[0],
+    concepto: '',
+    monto: '',
+    categoria: 'Alimentación'
+  });
+
+  // Form State for "Registrar Cobro"
+  const [formCobro, setFormCobro] = useState({
+    fecha: new Date().toISOString().split('T')[0],
+    monto: '',
+    metodo: 'Transferencia',
+    nota: ''
+  });
+
+  // Calculate hours & salary preview for input shift
+  const previewShift = useMemo(() => {
+    if (!formJornada.entrada || !formJornada.salida) return { horasTotal: 0, hNorm: 0, hExtra: 0, total: 0 };
+
+    const [hE, mE] = formJornada.entrada.split(':').map(Number);
+    const [hS, mS] = formJornada.salida.split(':').map(Number);
+
+    let start = hE * 60 + mE;
+    let end = hS * 60 + mS;
+
+    if (end < start) end += 24 * 60; // Overnight shift
+
+    const diffMinutes = Math.max(0, end - start - Number(formJornada.descanso || 0));
+    const hours = diffMinutes / 60;
+
+    const baseHoursLimit = Number(tarifas.horasPorJornada) || 8;
+    const hNorm = Math.min(hours, baseHoursLimit);
+    const hExtra = Math.max(0, hours - baseHoursLimit);
+
+    const extraMultiplier = formJornada.tipoDia === 'Festivo' ? 1.25 : 1.0;
+    const rateNormal = Number(tarifas.horaNormal) || 0;
+    const rateExtra = Number(tarifas.horaExtra) || 0;
+
+    const total = (hNorm * rateNormal + hExtra * rateExtra) * extraMultiplier;
+
+    return {
+      horasTotal: hours.toFixed(1),
+      hNorm: hNorm.toFixed(1),
+      hExtra: hExtra.toFixed(1),
+      total: total.toFixed(2)
+    };
+  }, [formJornada, tarifas]);
+
+  // Handlers
+  const handleSaveJornada = (e) => {
+    e.preventDefault();
+    const newJornada = {
+      id: Date.now().toString(),
+      ...formJornada,
+      horasNormales: parseFloat(previewShift.hNorm),
+      horasExtra: parseFloat(previewShift.hExtra),
+      monto: parseFloat(previewShift.total),
+      cobrado: false
+    };
+
+    setJornadas([newJornada, ...jornadas]);
+    showToast('✅ Jornada registrada exitosamente');
+    setFormJornada({
+      ...formJornada,
+      notas: ''
+    });
+  };
+
+  const handleDeleteJornada = (id) => {
+    if (window.confirm('¿Deseas eliminar este registro de jornada?')) {
+      setJornadas(jornadas.filter(j => j.id !== id));
+      showToast('🗑️ Jornada eliminada');
+    }
+  };
+
+  const handleSaveGasto = (e) => {
+    e.preventDefault();
+    if (!formGasto.monto || !formGasto.concepto) return;
+
+    const newGasto = {
+      id: Date.now().toString(),
+      fecha: formGasto.fecha,
+      concepto: formGasto.concepto,
+      monto: parseFloat(formGasto.monto),
+      categoria: formGasto.categoria
+    };
+
+    setGastos([newGasto, ...gastos]);
+    showToast('📉 Gasto registrado');
+    setFormGasto({
+      fecha: new Date().toISOString().split('T')[0],
+      concepto: '',
+      monto: '',
+      categoria: 'Alimentación'
+    });
+  };
+
+  const handleDeleteGasto = (id) => {
+    setGastos(gastos.filter(g => g.id !== id));
+    showToast('🗑️ Gasto eliminado');
+  };
+
+  const handleSaveCobro = (e) => {
+    e.preventDefault();
+    if (!formCobro.monto) return;
+
+    const newCobro = {
+      id: Date.now().toString(),
+      fecha: formCobro.fecha,
+      monto: parseFloat(formCobro.monto),
+      metodo: formCobro.metodo,
+      nota: formCobro.nota
+    };
+
+    setCobros([newCobro, ...cobros]);
+    showToast('💶 Cobro registrado correctamente');
+    setFormCobro({
+      fecha: new Date().toISOString().split('T')[0],
+      monto: '',
+      metodo: 'Transferencia',
+      nota: ''
+    });
+  };
+
+  const handleDeleteCobro = (id) => {
+    setCobros(cobros.filter(c => c.id !== id));
+    showToast('🗑️ Cobro eliminado');
+  };
+
+  // Export / Import / Reset Backup
+  const handleExportData = () => {
+    const data = {
+      tarifas,
+      jornadas,
+      gastos,
+      cobros,
+      exportDate: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `work_pay_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    showToast('💾 Respaldo descargado');
+  };
+
+  const handleImportData = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (parsed.tarifas) setTarifas(parsed.tarifas);
+        if (parsed.jornadas) setJornadas(parsed.jornadas);
+        if (parsed.gastos) setGastos(parsed.gastos);
+        if (parsed.cobros) setCobros(parsed.cobros);
+        showToast('🔄 Datos importados con éxito');
+        setShowBackupModal(false);
+      } catch (err) {
+        showToast('❌ Error al leer el archivo JSON');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleResetData = () => {
+    if (window.confirm('¿Estás seguro de restablecer todos los datos? Se borrará el historial.')) {
+      setJornadas(INITIAL_JORNADAS);
+      setGastos(INITIAL_GASTOS);
+      setCobros(INITIAL_COBROS);
+      setTarifas({ horaNormal: 15, horaExtra: 18, horasPorJornada: 8 });
+      showToast('🔄 Datos restaurados de fábrica');
+      setShowBackupModal(false);
+    }
+  };
+
+  // Format Helpers
+  const formatCurrency = (val) => {
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(val || 0);
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  };
 
   return (
-    <div style={styles.appContainer}>
-      <header style={styles.header}>
-        <div style={styles.headerTitleGroup}>
-          <span style={styles.logoIcon}>W</span>
-          <div>
-            <h1 style={styles.headerTitle}>Work & Pay Pro</h1>
-            <p style={styles.headerSubtitle}>mié, 28 oct 2026</p>
-          </div>
-        </div>
-        <button style={styles.backupBtn}>Respaldo</button>
-      </header>
+    <div className="app-viewport">
+      <style>{`
+        * {
+          box-sizing: border-box;
+          -webkit-tap-highlight-color: transparent;
+        }
 
-      <main style={styles.mainContent}>
-        <div style={styles.cardsRow}>
-          <div style={styles.card}>
-            <span style={styles.cardLabel}>A COBRAR</span>
-            <span style={styles.cardValue}>0,00 €</span>
-            <span style={styles.cardSubtext}>0,0 h acumuladas</span>
-          </div>
-          <div style={styles.card}>
-            <span style={styles.cardLabel}>DISPONIBLE</span>
-            <span style={styles.cardValue}>0,00 €</span>
-            <span style={styles.cardSubtext}>Cobrado menos gastos</span>
-          </div>
-        </div>
+        body {
+          margin: 0;
+          padding: 0;
+          background-color: #0b0f19;
+          color: #f1f5f9;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-        <div style={styles.sectionCard}>
-          <h2 style={styles.sectionTitle}>Tarifas por hora</h2>
-          <div style={styles.ratesRow}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Hora normal (€)</label>
-              <input type="number" defaultValue="15" style={styles.input} />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Hora extra (€)</label>
-              <input type="number" defaultValue="18" style={styles.input} />
-            </div>
-          </div>
-        </div>
+        .app-viewport {
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          min-height: 100vh;
+          min-height: 100dvh;
+          background-color: #0b0f19;
+        }
 
-        <div style={styles.sectionCard}>
-          <h2 style={styles.sectionTitle}>+ Registrar jornada</h2>
-          <div style={styles.formRow}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Fecha</label>
-              <input type="date" defaultValue="2026-10-28" style={styles.input} />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Tipo de día</label>
-              <select style={styles.select}>
-                <option>Día normal</option>
-                <option>Festivo</option>
-              </select>
-            </div>
-          </div>
+        .mobile-container {
+          width: 100%;
+          max-width: 500px;
+          min-height: 100vh;
+          min-height: 100dvh;
+          background-color: #0f172a;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+        }
 
-          <div style={styles.formRow3}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Entrada</label>
-              <input type="time" defaultValue="09:00" style={styles.input} />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Salida</label>
-              <input type="time" defaultValue="18:00" style={styles.input} />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Descanso (min)</label>
-              <input type="number" defaultValue="60" style={styles.input} />
-            </div>
-          </div>
+        /* Responsive Header */
+        .header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px;
+          background-color: #1e293b;
+          border-bottom: 1px solid #334155;
+          position: sticky;
+          top: 0;
+          z-index: 20;
+        }
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Categoría</label>
-            <select style={styles.select}>
-              <option>General</option>
-            </select>
-          </div>
+        .header-brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Notas del día</label>
-            <textarea placeholder="Detalles de la jornada..." style={styles.textarea}></textarea>
-          </div>
+        .logo-badge {
+          background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+          color: #ffffff;
+          font-weight: 800;
+          font-size: 20px;
+          border-radius: 10px;
+          width: 42px;
+          height: 42px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
 
-          <button style={styles.saveBtn}>Guardar jornada</button>
-        </div>
-      </main>
+        .header-title {
+          font-size: 18px;
+          font-weight: 700;
+          margin: 0;
+          color: #f8fafc;
+          line-height: 1.2;
+        }
 
-      <nav style={styles.bottomNav}>
-        <button
-          style={{ ...styles.navItem, color: activeTab === 'jornada' ? '#3b82f6' : '#9ca3af' }}
-          onClick={() => setActiveTab('jornada')}
-        >
-          <span style={styles.navIcon}>⏱️</span>
-          <span>Jornada</span>
-        </button>
-        <button
-          style={{ ...styles.navItem, color: activeTab === 'cobro' ? '#3b82f6' : '#9ca3af' }}
-          onClick={() => setActiveTab('cobro')}
-        >
-          <span style={styles.navIcon}>💶</span>
-          <span>Cobro</span>
-        </button>
-        <button
-          style={{ ...styles.navItem, color: activeTab === 'gastos' ? '#3b82f6' : '#9ca3af' }}
-          onClick={() => setActiveTab('gastos')}
-        >
-          <span style={styles.navIcon}>📊</span>
-          <span>Gastos</span>
-        </button>
-        <button
-          style={{ ...styles.navItem, color: activeTab === 'historial' ? '#3b82f6' : '#9ca3af' }}
-          onClick={() => setActiveTab('historial')}
-        >
-          <span style={styles.navIcon}>📅</span>
-          <span>Historial</span>
-        </button>
-      </nav>
-    </div>
-  );
-}
+        .header-subtitle {
+          font-size: 13px;
+          color: #94a3b8;
+          margin: 2px 0 0 0;
+          text-transform: capitalize;
+        }
 
-const styles = {
-  appContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    height: '100dvh',
-    width: '100%',
-    backgroundColor: '#0f172a',
-    color: '#f8fafc',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
-    margin: 0,
-    padding: 0,
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '12px 16px',
-    backgroundColor: '#1e293b',
-    borderBottom: '1px solid #334155',
-    width: '100%',
-    flexShrink: 0,
-    boxSizing: 'border-box',
-  },
-  headerTitleGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  logoIcon: {
-    backgroundColor: '#3b82f6',
-    color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: '18px',
-    borderRadius: '6px',
-    padding: '4px 8px',
-  },
-  headerTitle: {
-    fontSize: '16px',
-    fontWeight: 'bold',
-    margin: 0,
-  },
-  headerSubtitle: {
-    fontSize: '12px',
-    color: '#94a3b8',
-    margin: 0,
-  },
-  backupBtn: {
-    backgroundColor: 'transparent',
-    border: '1px solid #475569',
-    color: '#f8fafc',
-    padding: '6px 12px',
-    borderRadius: '6px',
-    fontSize: '13px',
-    cursor: 'pointer',
-  },
-  mainContent: {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'stretch',
-    gap: '16px',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  cardsRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  card: {
-    backgroundColor: '#1e293b',
-    padding: '12px',
-    borderRadius: '8px',
-    border: '1px solid #334155',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    boxSizing: 'border-box',
-  },
-  cardLabel: {
-    fontSize: '10px',
-    color: '#94a3b8',
-    fontWeight: 'bold',
-  },
-  cardValue: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#38bdf8',
-  },
-  cardSubtext: {
-    fontSize: '11px',
-    color: '#64748b',
-  },
-  sectionCard: {
-    backgroundColor: '#1e293b',
-    padding: '16px',
-    borderRadius: '8px',
-    border: '1px solid #334155',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  sectionTitle: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    margin: 0,
-    color: '#e2e8f0',
-  },
-  ratesRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
-    width: '100%',
-  },
-  formRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
-    width: '100%',
-  },
-  formRow3: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr',
-    gap: '8px',
-    width: '100%',
-  },
-  inputGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    width: '100%',
-  },
-  label: {
-    fontSize: '11px',
-    color: '#94a3b8',
-  },
-  input: {
-    backgroundColor: '#0f172a',
-    border: '1px solid #334155',
-    borderRadius: '6px',
-    color: '#f8fafc',
-    padding: '8px',
-    fontSize: '13px',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  select: {
-    backgroundColor: '#0f172a',
-    border: '1px solid #334155',
-    borderRadius: '6px',
-    color: '#f8fafc',
-    padding: '8px',
-    fontSize: '13px',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  textarea: {
-    backgroundColor: '#0f172a',
-    border: '1px solid #334155',
-    borderRadius: '6px',
-    color: '#f8fafc',
-    padding: '8px',
-    fontSize: '13px',
-    minHeight: '60px',
-    resize: 'vertical',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  saveBtn: {
-    backgroundColor: '#2563eb',
-    color: '#ffffff',
-    border: 'none',
-    padding: '12px',
-    borderRadius: '6px',
-    fontWeight: 'bold',
-    fontSize: '14px',
-    cursor: 'pointer',
-    marginTop: '8px',
-    width: '100%',
-  },
-  bottomNav: {
-    display: 'flex',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#1e293b',
-    borderTop: '1px solid #334155',
-    padding: '8px 0',
-    width: '100%',
-    flexShrink: 0,
-    boxSizing: 'border-box',
-  },
-  navItem: {
-    background: 'none',
-    border: 'none',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '2px',
-    fontSize: '11px',
-    cursor: 'pointer',
-  },
-  navIcon: {
-    fontSize: '16px',
-  },
-};
+        .btn-backup {
+          background-color: #334155;
+          border: 1px solid #475569;
+          color: #f8fafc;
+          padding: 8px 14px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.2s ease;
+        }
+
+        .btn-backup:active {
+          background-color: #475569;
+          transform: scale(0.96);
+        }
+
+        /* Main Scrollable Area */
+        .main-content {
+          flex: 1;
+          overflow-y: auto;
+          padding: 16px;
+          padding-bottom: 90px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        /* Summary Cards Grid */
+        .summary-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+
+        .card-stat {
+          background: linear-gradient(145deg, #1e293b 0%, #182234 100%);
+          padding: 16px;
+          border-radius: 14px;
+          border: 1px solid #334155;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+          font-size: 11px;
+          letter-spacing: 0.5px;
+          color: #94a3b8;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        .stat-value {
+          font-size: 22px;
+          font-weight: 800;
+          color: #38bdf8;
+          line-height: 1.1;
+        }
+
+        .stat-value.green {
+          color: #4ade80;
+        }
+
+        .stat-value.amber {
+          color: #fbbf24;
+        }
+
+        .stat-subtext {
+          font-size: 12px;
+          color: #64748b;
+        }
+
+        /* Section Cards */
+        .section-card {
+          background-color: #1e293b;
+          padding: 18px;
+          border-radius: 14px;
+          border: 1px solid #334155;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .section-title {
+          font-size: 16px;
+          font-weight: 700;
+          margin: 0;
+          color: #f1f5f9;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        /* Form Controls - Scaled for Touch */
+        .form-grid-2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+
+        .form-grid-3 {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 10px;
+        }
+
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .input-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #cbd5e1;
+        }
+
+        .input-control {
+          background-color: #0f172a;
+          border: 1.5px solid #334155;
+          border-radius: 10px;
+          color: #f8fafc;
+          padding: 12px 14px;
+          font-size: 16px; /* 16px prevents iOS auto-zoom on focus */
+          width: 100%;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-control:focus {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        textarea.input-control {
+          min-height: 80px;
+          resize: vertical;
+        }
+
+        /* Calculated Badge */
+        .preview-badge {
+          background-color: #0f172a;
+          border: 1px dashed #3b82f6;
+          border-radius: 10px;
+          padding: 12px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .preview-label {
+          font-size: 13px;
+          color: #94a3b8;
+        }
+
+        .preview-amount {
+          font-size: 18px;
+          font-weight: 700;
+          color: #60a5fa;
+        }
+
+        /* Buttons */
+        .btn-primary {
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+          color: #ffffff;
+          border: none;
+          padding: 14px;
+          border-radius: 10px;
+          font-weight: 700;
+          font-size: 16px;
+          cursor: pointer;
+          width: 100%;
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .btn-primary:active {
+          transform: scale(0.98);
+        }
+
+        .btn-danger-sm {
+          background-color: rgba(239, 68, 68, 0.15);
+          color: #f87171;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          padding: 6px 10px;
+          border-radius: 6px;
+          font-size: 12px;
+          cursor: pointer;
+        }
+
+        /* Lists and Cards */
+        .item-list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .item-card {
+          background-color: #0f172a;
+          border: 1px solid #334155;
+          border-radius: 10px;
+          padding: 12px 14px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .item-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .item-title {
+          font-size: 15px;
+          font-weight: 600;
+          color: #f1f5f9;
+        }
+
+        .item-sub {
+          font-size: 12px;
+          color: #94a3b8;
+        }
+
+        .item-value {
+          font-size: 16px;
+          font-weight: 700;
+          color: #38bdf8;
+          text-align: right;
+        }
+
+        /* Bottom Nav - Touch Friendly */
+        .bottom-nav {
+          position: fixed;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 100%;
+          max-width: 500px;
+          height: 70px;
+          background-color: #1e293b;
+          border-top: 1px solid #334155;
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          z-index: 30;
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-btn {
+          background: none;
+          border: none;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          padding: 8px 12px;
+          width: 25%;
+          height: 100%;
+          cursor: pointer;
+          color: #94a3b8;
+          font-size: 12px;
+          font-weight: 600;
+          transition: color 0.2s;
+        }
+
+        .nav-btn.active {
+          color: #3b82f6;
+        }
+
+        .nav-icon {
+          font-size: 22px;
+        }
+
+        /* Toast Popup */
+        .toast {
+          position: fixed;
+          top: 75px;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: #38bdf8;
+          color: #0f172a;
+          padding: 10px 20px;
+          border-radius: 20px;
+          font-weight: 700;
+          font-size: 14px;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+          z-index: 100;
+          animation: fadeIn 0.2s ease;
+        }
+
+        /* Modal Backdrop */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.75);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 50;
+          padding: 20px;
+        }
+
+        .modal-content {
+          background-color: #1e293b;
+          border: 1px solid #334155;
+          border-radius: 16px;
+          padding: 20px;
+          width: 100%;
+          max-width: 400px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translate(-50%, -10px); }
+          to { opacity: 1; transform: translate(-50%, 0); }
+        }
+      `}</style>
+
+      <div className="mobile-container">
+        {/* Toast Alert */}
+        {toastMessage && <div className="toast">{toastMessage}</div>}
+
+        {/* Header */}
+        
