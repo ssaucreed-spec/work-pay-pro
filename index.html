@@ -5,7 +5,6 @@ export default function App() {
 
   return (
     <div style={styles.appContainer}>
-      {/* Reseteo global forzado para eliminar márgenes en móviles */}
       <style>{`
         * {
           box-sizing: border-box !important;
@@ -208,7 +207,6 @@ const styles = {
     padding: '16px',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
     gap: '16px',
     width: '100%',
     boxSizing: 'border-box',
@@ -218,7 +216,6 @@ const styles = {
     gridTemplateColumns: '1fr 1fr',
     gap: '12px',
     width: '100%',
-    maxWidth: '100%',
     boxSizing: 'border-box',
   },
   card: {
@@ -253,7 +250,6 @@ const styles = {
     flexDirection: 'column',
     gap: '12px',
     width: '100%',
-    maxWidth: '100%',
     boxSizing: 'border-box',
   },
   sectionTitle: {
